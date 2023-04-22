@@ -66,8 +66,9 @@ main:
     li      $t4, 0
     or      $t4, $t4, TIMER_INT_MASK            # enable timer interrupt
     or      $t4, $t4, BONK_INT_MASK             # enable bonk interrupt
+    or      $t4, $t4, STOP_FALLING_INT_MASK     # enable stop falling interrupt
     or      $t4, $t4, REQUEST_PUZZLE_INT_MASK   # enable puzzle interrupt
-	or		$t4, $t4, OUT_OF_WATER_INT_MASK		# enable out of water interrupt
+    or	    $t4, $t4, OUT_OF_WATER_INT_MASK	# enable out of water interrupt
     or      $t4, $t4, 1 # global enable
     mtc0    $t4, $12
         
@@ -174,6 +175,13 @@ bonk_interrupt:
     li      $t1, 1
     sb      $t1, 0($t0)
     #Fill in your bonk handler code here
+    li $t1, 180               # turn around
+    sw $t1, ANGLE
+    li $t1, 0
+    sw $t1, ANGLE_CONTROL
+
+    li $t2, 1              # move
+    sw $t2, VELOCITY
     j       interrupt_dispatch      # see if other interrupts are waiting
 
 timer_interrupt:
@@ -198,6 +206,12 @@ request_puzzle_interrupt:
 falling_interrupt:
     sw      $0, FALLING_ACK
     #Fill in your falling interrupt handler code here
+    li $t1, 0               # face right
+    sw $t1, ANGLE
+    li $t1, 1
+    sw $t1, ANGLE_CONTROL
+    li $t2, 1              # move
+    sw $t2, VELOCITY
     j       interrupt_dispatch
 
 stop_falling_interrupt:
